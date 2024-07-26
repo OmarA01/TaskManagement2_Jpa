@@ -1,5 +1,6 @@
 package com.digitinary.jpa.entities.taskmanagement;
 
+import com.digitinary.jpa.exceptions.InvalidNameException;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -27,6 +28,9 @@ public class Project {
     }
 
     public Project(String name) {
+        if(name == null)
+            throw new InvalidNameException("Project name cant be null");
+
         this.name = name;
     }
 
@@ -40,12 +44,14 @@ public class Project {
         this.id = id;
     }
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, unique = true)
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
+        if(name == null)
+            throw new InvalidNameException("Project name cant be null");
         this.name = name;
     }
 

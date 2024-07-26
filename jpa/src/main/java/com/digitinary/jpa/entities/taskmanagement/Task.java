@@ -2,9 +2,12 @@ package com.digitinary.jpa.entities.taskmanagement;
 
 import com.digitinary.jpa.enums.Priority;
 import com.digitinary.jpa.enums.Status;
+import com.digitinary.jpa.exceptions.InvalidDateException;
+import com.digitinary.jpa.exceptions.InvalidNameException;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,23 +35,21 @@ public class Task {
 
     }
 
-    /*public Task(String title, String description, String status, String priority, String dueDate){
+    public Task(String title, String description, String status, String priority, String dueDate){
         if(title == null || description == null || status == null || priority == null || dueDate == null)
             throw new IllegalArgumentException("Some attributes are null. Please provide valid attributes");
 
-        if (!dueDate.matches("^(0[1-9]|[1-2][0-9]|3[0-1])/(0[1-9]|1[0-2])/\\d{4}$"))
-            throw new IllegalArgumentException("Due Date should match this format dd/MM/yyyy");
+        isValidDate(dueDate);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         LocalDate date = LocalDate.parse(dueDate, formatter);
 
-        this.id = 0;
         this.title = title;
         this.description = description;
         setStatus(status);
         setPriority(priority);
         this.dueDate = date;
-    }*/
+    }
 
     // Getters and setters
     @Id
@@ -61,12 +62,13 @@ public class Task {
         this.id = id;
     }
 
-    @Column(name = "title")
+    @Column(name = "title", unique = true)
     public String getTitle() {
         return title;
     }
 
     public void setTitle(String title) {
+        validateString(title, "title");
         this.title = title;
     }
 
@@ -76,6 +78,7 @@ public class Task {
     }
 
     public void setDescription(String description) {
+        validateString(description, "description");
         this.description = description;
     }
 
@@ -86,6 +89,7 @@ public class Task {
     }
 
     public void setStatus(String status) {
+        validateString(status, "status");
         status = status.toUpperCase();
         switch (status) {
             case "P":
@@ -109,6 +113,7 @@ public class Task {
     }
 
     public void setPriority(String priority) {
+        validateString(priority, "priority");
         priority = priority.toUpperCase();
         switch (priority) {
             case "H":
@@ -130,8 +135,11 @@ public class Task {
         return dueDate;
     }
 
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
+    public void setDueDate(String dueDate) {
+        isValidDate(dueDate);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        this.dueDate = LocalDate.parse(dueDate, formatter);
     }
 
     @ManyToMany(mappedBy = "tasks")
@@ -141,6 +149,24 @@ public class Task {
 
     public void setProjects(Set<Project> projects) {
         this.projects = projects;
+    }
+
+    private void isValidDate(String dueDate){
+        if (!dueDate.matches("^(0[1-9]|[1-2][0-9]|3[0-1])/(0[1-9]|1[0-2])/\\d{4}$"))
+            throw new InvalidDateException("Due Date should match this format dd/MM/yyyy");
+    }
+
+    private void validateString(String string, String type){
+        if(string == null)
+            throw new InvalidNameException(type+" can't be null");
+    }
+
+    public void updateTask(String title, String description, String status, String priority, String dueDate ){
+        setTitle(title);
+        setDescription(description);
+        setStatus(status);
+        setPriority(priority);
+        setDueDate(dueDate);
     }
 
     @Override

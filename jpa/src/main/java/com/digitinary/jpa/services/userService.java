@@ -1,6 +1,7 @@
 package com.digitinary.jpa.services;
 
-import com.digitinary.jpa.exceptions.UserAlreadyExistsException;
+import com.digitinary.jpa.exceptions.AlreadyExistsException;
+import com.digitinary.jpa.exceptions.NotFoundException;
 import com.digitinary.jpa.repositories.userRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class userService {
             userRepo.save(user);
             System.out.println("User created successfully");
         } else {
-            throw new UserAlreadyExistsException("User already exists");
+            throw new AlreadyExistsException("User already exists");
         }
     }
 
@@ -40,7 +41,7 @@ public class userService {
             userRepo.deleteById(userId);
             System.out.println("User removed successfully");
         } else {
-            System.out.println("User doesn't exist");
+            throw new NotFoundException("User doesn't exist");
         }
     }
 
@@ -50,14 +51,22 @@ public class userService {
             userRepo.deleteByEmail(email);
             System.out.println("User removed successfully");
         } else {
-            System.out.println("User doesn't exist");
+            throw new NotFoundException("User doesn't exist");
         }
     }
 
     @Transactional
     public void updateUser(Integer userId, String firstName, String lastName, String email) {
-        User user = userRepo.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepo.findById(userId).orElseThrow(() -> new NotFoundException("User not found"));
         user.updateUser(firstName, lastName, email);
         userRepo.save(user);
+    }
+
+    @Transactional
+    public void deleteUser(Integer userId){
+        if(!userRepo.existsById(userId))
+            throw new NotFoundException("User doesn't exist");
+
+        userRepo.deleteById(userId);
     }
 }
