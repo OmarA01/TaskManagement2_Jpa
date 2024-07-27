@@ -1,17 +1,14 @@
 package com.digitinary.jpa.controllers;
 
-import com.digitinary.jpa.entities.usermanagement.User;
 import com.digitinary.jpa.repositories.userRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
-
-@Configuration
-public class userConfig {
+@org.springframework.context.annotation.Configuration
+public class Configuration {
 
     @Bean
     CommandLineRunner commandLineRunner(userRepository userRepo){
@@ -33,6 +30,9 @@ public class userConfig {
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return mapper;
     }
 }

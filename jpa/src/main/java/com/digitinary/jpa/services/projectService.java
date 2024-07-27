@@ -2,27 +2,29 @@ package com.digitinary.jpa.services;
 
 import com.digitinary.jpa.entities.taskmanagement.Project;
 import com.digitinary.jpa.entities.taskmanagement.Task;
+import com.digitinary.jpa.entities.usermanagement.User;
 import com.digitinary.jpa.exceptions.AlreadyExistsException;
 import com.digitinary.jpa.exceptions.NotFoundException;
 import com.digitinary.jpa.repositories.projectRepository;
 import com.digitinary.jpa.repositories.taskRepository;
+import com.digitinary.jpa.repositories.userRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
-public class projectService {
+public class ProjectService {
     private final projectRepository projectRepo;
-    private final taskRepository taskRepo;
-
+    private final userRepository userRepo;
 
     @Autowired
-    public projectService(projectRepository projectRepo, taskRepository taskRepo) {
+    public ProjectService(projectRepository projectRepo, taskRepository taskRepo, userRepository userRepo) {
         this.projectRepo = projectRepo;
-        this.taskRepo = taskRepo;
+        this.userRepo = userRepo;
     }
 
     @Transactional
@@ -31,13 +33,12 @@ public class projectService {
     }
 
     @Transactional
-    public List<Task> getProjectTasks(Integer projectId){
+    public Project getProject(Integer projectId){
         Optional<Project> project = projectRepo.findById(projectId);
-        if (project.isPresent()) {
-            return List.copyOf(project.get().getTasks());
-        } else {
+        if(project.isEmpty())
             throw new NotFoundException("Project not found");
-        }
+
+        return project.get();
     }
 
     @Transactional
@@ -52,40 +53,53 @@ public class projectService {
 
     @Transactional
     public void removeProject(Integer projectId) {
-        if (projectRepo.existsById(projectId)) {
-            projectRepo.deleteById(projectId);
-            System.out.println("Porject removed successfully");
-        } else {
-            throw new NotFoundException("Project doesn't exist");
-        }
-    }
+        Project project = projectRepo.findById(projectId).orElseThrow(() -> new NotFoundException("Project doesn't exist"));
 
-    @Transactional
-    public void removeProject(String name) {
-        if (projectRepo.existsByName(name)) {
-            projectRepo.deleteByName(name);
-            System.out.println("Project removed successfully");
-        } else {
-            throw new NotFoundException("Project doesn't exist");
+        for (Task task : project.getTasks()) {
+            project.removeTask(task.getTitle());
         }
-    }
-
-    @Transactional
-    public void addTaskToProject(Integer projectId, Integer taskId) {
-        Project project = projectRepo.findById(projectId).orElseThrow(() -> new NotFoundException("Project not found"));
-        Task task = taskRepo.findById(taskId).orElseThrow(() -> new NotFoundException("Task not found"));
-        project.addTask(task);
         projectRepo.save(project);
+        projectRepo.delete(project);
+        System.out.println("Project removed successfully");
     }
 
     @Transactional
-    public void removeTaskFromProject(Integer projectId, Integer taskId) {
-        Project project = projectRepo.findById(projectId)
-                .orElseThrow(() -> new RuntimeException("Project not found"));
-        Task task = taskRepo.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+    public void updateProject(Integer projectId, String name){
+        Project project = projectRepo.findById(projectId).orElseThrow(() -> new NotFoundException("Project doesn't exist"));
 
-        project.removeTask(task.getTitle());
+        project.setName(name);
+        projectRepo.save(project);
+
+        System.out.println("Project updated successfully");
+    }
+
+    @Transactional
+    public List<Task> getProjectTasks(Integer projectId){
+        Optional<Project> project = projectRepo.findById(projectId);
+        if (project.isPresent()) {
+            return List.copyOf(project.get().getTasks());
+        } else {
+            throw new NotFoundException("Project not found");
+        }
+    }
+
+    @Transactional
+    public List<User> getProjectAssignedUsers(Integer projectId){
+        Project project = projectRepo.findById(projectId).orElseThrow(() -> new NotFoundException("Project doesn't exist"));
+
+        Set<User> users = project.getUsers();
+        return List.copyOf(users);
+    }
+
+    @Transactional
+    public void assignUserToProject(Integer projectId, Integer userId){
+        Project project = projectRepo.findById(projectId)
+                .orElseThrow(() -> new NotFoundException("Project not found"));
+
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        project.addUser(user);
         projectRepo.save(project);
     }
 

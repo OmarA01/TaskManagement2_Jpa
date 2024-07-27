@@ -1,9 +1,12 @@
 package com.digitinary.jpa.entities.taskmanagement;
 
+import com.digitinary.jpa.entities.usermanagement.User;
 import com.digitinary.jpa.enums.Priority;
 import com.digitinary.jpa.enums.Status;
 import com.digitinary.jpa.exceptions.InvalidDateException;
 import com.digitinary.jpa.exceptions.InvalidNameException;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -19,6 +22,7 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "Task")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Task {
 
     private Integer id;
@@ -28,6 +32,7 @@ public class Task {
     private Priority priority;
     private LocalDate dueDate;
     private Set<Project> projects = new HashSet<>();
+    private Set<User> users = new HashSet<>();
     /**
      * Default constructor
      */
@@ -35,7 +40,7 @@ public class Task {
 
     }
 
-    public Task(String title, String description, String status, String priority, String dueDate){
+    public Task(String title, String description, Status status, Priority priority, String dueDate){
         if(title == null || description == null || status == null || priority == null || dueDate == null)
             throw new IllegalArgumentException("Some attributes are null. Please provide valid attributes");
 
@@ -53,12 +58,13 @@ public class Task {
 
     // Getters and setters
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_seq")
+    @SequenceGenerator(name = "task_seq", sequenceName = "task_sequence", allocationSize = 1)
     public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    private void setId(int id) {
         this.id = id;
     }
 
@@ -88,7 +94,7 @@ public class Task {
         return status;
     }
 
-    public void setStatus(String status) {
+    /*public void setStatus(String status) {
         validateString(status, "status");
         status = status.toUpperCase();
         switch (status) {
@@ -104,6 +110,10 @@ public class Task {
             default:
                 throw new IllegalArgumentException("Invalid status value");
         }
+    }*/
+
+    public void setStatus(Status status){
+        this.status = status;
     }
 
     @Enumerated(EnumType.STRING)
@@ -112,7 +122,7 @@ public class Task {
         return priority;
     }
 
-    public void setPriority(String priority) {
+   /* public void setPriority(String priority) {
         validateString(priority, "priority");
         priority = priority.toUpperCase();
         switch (priority) {
@@ -128,6 +138,10 @@ public class Task {
             default:
                 throw new IllegalArgumentException("Invalid priority value");
         }
+    }*/
+
+    public void setPriority(Priority priority){
+        this.priority = priority;
     }
 
     @Column(name = "due_date")
@@ -135,11 +149,15 @@ public class Task {
         return dueDate;
     }
 
-    public void setDueDate(String dueDate) {
+    /*public void setDueDate(String dueDate) {
         isValidDate(dueDate);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         this.dueDate = LocalDate.parse(dueDate, formatter);
+    }*/
+
+    public void setDueDate(LocalDate dueDate){
+        this.dueDate = dueDate;
     }
 
     @ManyToMany(mappedBy = "tasks")
@@ -149,6 +167,15 @@ public class Task {
 
     public void setProjects(Set<Project> projects) {
         this.projects = projects;
+    }
+
+    @ManyToMany(mappedBy = "tasks")
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
     }
 
     private void isValidDate(String dueDate){
@@ -161,12 +188,19 @@ public class Task {
             throw new InvalidNameException(type+" can't be null");
     }
 
-    public void updateTask(String title, String description, String status, String priority, String dueDate ){
-        setTitle(title);
-        setDescription(description);
-        setStatus(status);
-        setPriority(priority);
-        setDueDate(dueDate);
+    public void updateTask(Task task){
+        if(task.getTitle() != null)
+            this.setTitle(task.getTitle());
+        if(task.getDescription() != null)
+            this.setDescription(task.getDescription());
+        if(task.getStatus() != null)
+            this.setStatus(task.getStatus());
+        if(task.getPriority() != null)
+            this.setPriority(task.getPriority());
+        if(task.getDueDate() != null)
+            this.setDueDate(task.getDueDate());
+
+        System.out.println("Task updated successfully");
     }
 
     @Override
