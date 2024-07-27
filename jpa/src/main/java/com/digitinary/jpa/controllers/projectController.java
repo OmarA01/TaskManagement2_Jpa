@@ -4,6 +4,7 @@ import com.digitinary.jpa.entities.taskmanagement.Project;
 import com.digitinary.jpa.entities.taskmanagement.Task;
 import com.digitinary.jpa.entities.usermanagement.User;
 import com.digitinary.jpa.services.ProjectService;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,5 +70,10 @@ public class ProjectController {
     public ResponseEntity<Void> assignUserToProject(@PathVariable("projectId") Integer projectId, @PathVariable("userId") Integer userId) {
         projectService.assignUserToProject(projectId, userId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping(path = "{projectId}/executeTasks")
+    public void executeTasks(@PathVariable("projectId") Integer projectId){
+        projectService.executeTasks(projectId);
     }
 }

@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -103,6 +104,16 @@ public class ProjectService {
         project.addUser(user);
         userRepo.save(user);
         projectRepo.save(project);
+    }
+
+    @Transactional
+    public void executeTasks(Integer projectId){
+        Project project = projectRepo.findById(projectId)
+                .orElseThrow(() -> new NotFoundException("Project not found"));
+
+        TaskProcessor taskProcessor = new TaskProcessor(10);
+        taskProcessor.executeTasks(project.getTasks().stream().toList());
+
     }
 
 }
