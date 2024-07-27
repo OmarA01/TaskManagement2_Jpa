@@ -21,7 +21,6 @@ Task Management V2 is a Spring Boot application designed to manage tasks efficie
 - Make sure you have the following settings in your `application.properties` file:
 
 ```properties
-spring.application.name=jpa
 spring.datasource.url=jdbc:postgresql://localhost:5432/TaskManagement
 spring.datasource.username=postgres
 spring.datasource.password=(your password)
