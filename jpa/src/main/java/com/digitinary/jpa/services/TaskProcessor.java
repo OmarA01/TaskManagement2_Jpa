@@ -2,7 +2,9 @@ package com.digitinary.jpa.services;
 
 import com.digitinary.jpa.entities.taskmanagement.Task;
 import com.digitinary.jpa.enums.Status;
+import com.digitinary.jpa.repositories.taskRepository;
 
+import javax.swing.*;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,6 +20,7 @@ public class TaskProcessor {
      * ExecuterService for working directly with threads
      */
     private ExecutorService executerService;
+    private final taskRepository taskRepo;
 
     /**
      * lock object to provide a synchronization mechanism for the execution
@@ -28,8 +31,9 @@ public class TaskProcessor {
      * Constructor to initialize a new TaskProcessor
      * @param ThreadPoolSize: number of threads needed in the pool
      */
-    public TaskProcessor(int ThreadPoolSize){
+    public TaskProcessor(int ThreadPoolSize, taskRepository taskRepo){
         this.executerService = Executors.newFixedThreadPool(ThreadPoolSize);
+        this.taskRepo = taskRepo;
     }
 
     /**
@@ -50,6 +54,7 @@ public class TaskProcessor {
                     }
 
                     task.setStatus(Status.COMPLETED); // task completed
+                    taskRepo.save(task);
                     System.out.println("Completed " + task.getTitle() + " ---\n");
                 }
             });

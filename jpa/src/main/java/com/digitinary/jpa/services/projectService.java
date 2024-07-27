@@ -21,11 +21,13 @@ import java.util.Set;
 public class ProjectService {
     private final projectRepository projectRepo;
     private final userRepository userRepo;
+    private final taskRepository taskRpo;
 
     @Autowired
-    public ProjectService(projectRepository projectRepo, taskRepository taskRepo, userRepository userRepo) {
+    public ProjectService(projectRepository projectRepo, taskRepository taskRepo, userRepository userRepo, taskRepository taskRpo) {
         this.projectRepo = projectRepo;
         this.userRepo = userRepo;
+        this.taskRpo = taskRpo;
     }
 
     @Transactional
@@ -111,7 +113,7 @@ public class ProjectService {
         Project project = projectRepo.findById(projectId)
                 .orElseThrow(() -> new NotFoundException("Project not found"));
 
-        TaskProcessor taskProcessor = new TaskProcessor(10);
+        TaskProcessor taskProcessor = new TaskProcessor(10, taskRpo);
         taskProcessor.executeTasks(project.getTasks().stream().toList());
 
     }
