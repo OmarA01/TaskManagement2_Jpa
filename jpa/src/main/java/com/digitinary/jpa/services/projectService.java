@@ -99,7 +99,9 @@ public class ProjectService {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
+        user.setProject(project);
         project.addUser(user);
+        userRepo.save(user);
         projectRepo.save(project);
     }
 
