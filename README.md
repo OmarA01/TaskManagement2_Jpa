@@ -27,4 +27,75 @@ spring.datasource.password=(your password)
 
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.hibernate.ddl-auto=update
+```
 
+## Paths
+
+### User Endpoints
+- `GET /api/users`
+  - Retrieve all users in the database.
+  
+- `POST /api/users`
+  - Add a new user with a JSON object in the request body.
+  
+- `GET /api/users/{id}`
+  - Retrieve a user by ID.
+  
+- `DELETE /api/users/{id}`
+  - Delete a user by ID.
+  
+- `PUT /api/users/{id}`
+  - Update a user by ID with a JSON object in the request body.
+  
+- `GET /api/users/{id}/project`
+  - Retrieve the project assigned to the user.
+  
+- `GET /api/users/{id}/project/tasks`
+  - Retrieve tasks assigned to the user in the project.
+
+### Task Endpoints
+- `GET /api/tasks/{id}/users`
+  - Retrieve users assigned to the task.
+  
+- `GET /api/tasks/{id}/projects`
+  - Retrieve projects that include the task.
+  
+- `POST /api/tasks/{taskId}/users/{userId}`
+  - Assign the task to a user.
+  
+- `DELETE /api/tasks/{taskId}/users/{userId}`
+  - Remove the task from a user.
+  
+- `POST /api/tasks/{taskId}/projects/{projectId}`
+  - Assign the task to a project.
+  
+- `DELETE /api/tasks/{taskId}/projects/{projectId}`
+  - Remove the task from a project.
+
+### Project Endpoints
+- `GET /api/projects`
+  - Retrieve all projects in the database.
+  
+- `POST /api/projects`
+  - Add a new project with a JSON object in the request body.
+  
+- `GET /api/projects/{projectId}`
+  - Retrieve a project by ID.
+  
+- `DELETE /api/projects/{projectId}`
+  - Delete a project by ID.
+  
+- `PUT /api/projects/{projectId}`
+  - Update a project by ID with a JSON object in the request body.
+  
+- `GET /api/projects/{projectId}/tasks`
+  - Retrieve tasks assigned to the project.
+  
+- `GET /api/projects/{projectId}/users`
+  - Retrieve users assigned to the project.
+  
+- `POST /api/projects/{projectId}/users/{userId}`
+  - Assign a user to the project.
+  
+- `GET /api/projects/{projectId}/executeTasks`
+  - Execute tasks assigned to the project.
